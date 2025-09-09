@@ -21,7 +21,7 @@ type Slide = {
    Helpers (cache-bust)
 =========================== */
 // cache-bust
-const v = "?v=18";
+const v = "?v=20";
 // BASE_URL is "/Vayumetrics-pitch-deck/" from vite.config.ts
 const asset = (file: string) => new URL(file + v, import.meta.env.BASE_URL).toString();
 
