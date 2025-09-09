@@ -19,8 +19,12 @@ type Slide = {
    Helpers
    - bump 'v' to bust browser cache
 =========================== */
-const v = "?v=15";
-const asset = (file: string) => `/${file}${v}`;
+// bump this when you change images/video to bust cache
+const v = '?v=15';
+
+// Use Vite's BASE_URL so paths work on GitHub Pages subpath
+const base = (import.meta as any).env?.BASE_URL ?? '/';
+const asset = (file: string) => `${base}${file}${v}`;
 
 /* ===========================
    Widgets
