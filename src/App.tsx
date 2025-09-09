@@ -1,3 +1,4 @@
+// src/App.tsx
 import React, { useEffect, useState } from "react";
 import { ArrowLeft, ArrowRight, ExternalLink, Mail } from "lucide-react";
 import "./deck.css";
@@ -5,27 +6,44 @@ import "./deck.css";
 /* ===========================
    Types
 =========================== */
-type Cta = { label: string; href?: string; onClick?: () => void; primary?: boolean };
+type CTA = { label: string; href?: string; onClick?: () => void; primary?: boolean };
 type Slide = {
   tag?: string;
   title?: string;
-  bullets?: string[];
+  bullets?: string[];      // omit to let the visual run full-bleed
   visual?: React.ReactNode;
   footnote?: string;
+  ctas?: CTA[];
   className?: string;
-  ctas?: Cta[];
 };
 
 /* ===========================
-   Helpers (cache-bust)
+   Asset helper (GitHub Pages safe)
+   - BASE_URL comes from Vite (e.g. "/Vayumetrics-pitch-deck/")
+   - bump v to bust caches on deploy
 =========================== */
-// cache-bust (bump whenever you change media)
 const v = "?v=23";
-
-// Safe path join using the repo base path Vite injects
 const base = (import.meta.env.BASE_URL || "/").replace(/\/+$/, "");
 const asset = (p: string) => `${base}/${String(p).replace(/^\/+/, "")}${v}`;
 
+/* Reusable image with graceful fallbacks */
+const Img: React.FC<{ src: string; alt: string; className?: string; fallbacks?: string[] }> = ({
+  src,
+  alt,
+  className,
+  fallbacks = [],
+}) => {
+  const sources = [src, ...fallbacks];
+  const [i, setI] = useState(0);
+  return (
+    <img
+      className={className}
+      src={asset(sources[i])}
+      alt={alt}
+      onError={() => setI((n) => (n + 1 < sources.length ? n + 1 : n))}
+    />
+  );
+};
 
 /* ===========================
    Widgets
@@ -43,26 +61,26 @@ const VideoHero: React.FC = () => {
           preload="auto"
           poster={asset("3D_digital_twin.png")}
           onError={() => setFallback(true)}
-          style={{ width: "100%", height: 360, objectFit: "cover" }}
+          style={{ width: "100%", height: 360, objectFit: "cover", borderRadius: 16 }}
         >
           <source src={asset("vayumetrics_scan_white.mp4")} type="video/mp4" />
         </video>
       ) : (
-        <img className="visual-img" src={asset("3D_digital_twin.png")} alt="Vayumetrics intro" />
+        <Img className="visual-img" src="3D_digital_twin.png" alt="Vayumetrics intro" />
       )}
     </div>
   );
 };
 
-/** ROI with left-side explanations */
+/** ROI calculator — stretches to the full visual area */
 function ROI() {
-  const [N, setN] = useState(40000); // locations
-  const [C, setC] = useState(6);     // cycles/yr
-  const [Lm, setLm] = useState(250); // manual loc/hr
-  const [Ld, setLd] = useState(3000);// drone loc/hr
-  const [sup, setSup] = useState(0.25); // supervision factor
-  const [rate, setRate] = useState(25); // $/hr
-  const [fee, setFee] = useState(24000);// $/yr
+  const [N, setN] = useState(40000);
+  const [C, setC] = useState(6);
+  const [Lm, setLm] = useState(250);
+  const [Ld, setLd] = useState(3000);
+  const [sup, setSup] = useState(0.25);
+  const [rate, setRate] = useState(25);
+  const [fee, setFee] = useState(24000);
 
   const Hm = (N * C) / Math.max(Lm, 1);
   const Hd = ((N * C) / Math.max(Ld, 1)) * Math.max(sup, 0);
@@ -70,16 +88,13 @@ function ROI() {
   const paybackMonths = labor > 0 ? (12 * Math.max(fee, 0)) / labor : Infinity;
 
   return (
-    <div className="roi">
-      <h3 style={{ marginBottom: 12 }}>ROI calculator</h3>
+    <div className="roi roi-wide">
+      <h3 style={{ margin: "0 0 12px" }}>ROI calculator</h3>
 
-      <div className="roi-wrap" style={{ display: "grid", gridTemplateColumns: "minmax(260px,1fr) 2fr", gap: 16 }}>
-        <aside
-          className="roi-legend"
-          style={{ border: "1px solid var(--line)", borderRadius: 12, padding: 12, background: "#fff" }}
-        >
-          <strong style={{ display: "block", marginBottom: 8 }}>What the inputs mean</strong>
-          <ul style={{ margin: "0 0 10px 18px", padding: 0, color: "var(--muted)" }}>
+      <div className="roi-wrap">
+        <aside className="roi-legend">
+          <strong className="mb8">What the inputs mean</strong>
+          <ul className="roi-notes">
             <li><b>Locations</b>: total storage positions (bins/bays/slots).</li>
             <li><b>Cycles / year</b>: number of complete counts per year.</li>
             <li><b>Manual rate</b>: locations per hour a person can count.</li>
@@ -89,27 +104,16 @@ function ROI() {
             <li><b>Annual fee</b>: yearly subscription + support per site.</li>
           </ul>
 
-          <strong style={{ display: "block", margin: "8px 0 6px" }}>Formulas</strong>
-          <div
-            style={{
-              fontFamily:
-                "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
-              fontSize: 12.5,
-              background: "#fbfdff",
-              border: "1px dashed var(--line)",
-              borderRadius: 8,
-              padding: "10px 12px",
-              color: "var(--ink)",
-            }}
-          >
-            <div>Manual hours = (Locations × Cycles) / Manual rate</div>
-            <div>Drone hours = (Locations × Cycles) / Drone rate × Supervision</div>
+          <strong className="mb6">Formulas</strong>
+          <div className="codebox">
+            <div>Manual hours = (Locations × Cycles) ÷ Manual rate</div>
+            <div>Drone hours = (Locations × Cycles) ÷ Drone rate × Supervision</div>
             <div>Labor savings = (Manual − Drone) × Labor $/hr</div>
             <div>Payback (months) = 12 × Annual fee ÷ Labor savings</div>
           </div>
         </aside>
 
-        <section>
+        <section className="roi-panel">
           <div className="roi-grid">
             <label>Locations<input type="number" value={N} min={0} onChange={(e) => setN(+e.target.value || 0)} /></label>
             <label>Cycles / year<input type="number" value={C} min={0} onChange={(e) => setC(+e.target.value || 0)} /></label>
@@ -134,132 +138,73 @@ function ROI() {
   );
 }
 
-/** Clear competitor landscape with legible labels & correct axes */
+const PricingCards: React.FC = () => (
+  <div className="price-grid">
+    <article className="price-card vision" aria-label="Vision plan">
+      <span className="badge">VISION</span>
+      <h3>Camera-first coverage</h3>
+      <div className="price">$18k–$24k / site / yr</div>
+      <ul className="features">
+        <li>Night scans; zero disruption</li>
+        <li>WMS reconciliation &amp; reports</li>
+        <li>Usage-based — capped</li>
+      </ul>
+      <div className="card-foot"><span className="hint">Best for single-site or pilots</span></div>
+    </article>
+
+    <article className="price-card pro" aria-label="Pro (LiDAR) plan">
+      <span className="badge">PRO (LiDAR)</span>
+      <h3>Highest accuracy &amp; coverage</h3>
+      <div className="price">$36k+ / site / yr</div>
+      <ul className="features">
+        <li>Spatial 3D twin + shelf state</li>
+        <li>Advanced exception workflows</li>
+        <li>Usage-based — capped</li>
+      </ul>
+      <div className="card-foot"><span className="hint">Multi-aisle / multi-site scale</span></div>
+    </article>
+  </div>
+);
+
+/** Simple competitor map (SVG only) */
 const CompetitorMap: React.FC = () => {
-  type Pt = {
-    x: number; y: number; r: number; label: string; color: string;
-    hero?: boolean; dx?: number; dy?: number; anchor?: "start" | "middle" | "end";
-  };
-
-  const pts: Pt[] = [
-    { x: 0.15, y: 0.15, r: 16, label: "Manual scanning", color: "#9aa7bd", dx: 16, dy: 6, anchor: "start" },
-    { x: 0.48, y: 0.62, r: 26, label: "Vayumetrics (software-first)", color: "#2b7cff", hero: true, dx: 18, dy: -18, anchor: "start" },
-    { x: 0.68, y: 0.42, r: 16, label: "Corvus (drones)", color: "#6da8ff", dx: 14, dy: -6, anchor: "start" },
-    { x: 0.62, y: 0.40, r: 16, label: "Gather AI (drones)", color: "#6da8ff", dx: 14, dy: 18, anchor: "start" },
-    { x: 0.64, y: 0.30, r: 16, label: "Dexory (AMR)", color: "#6da8ff", dx: 14, dy: 22, anchor: "start" },
-    { x: 0.66, y: 0.26, r: 16, label: "Vimaan (fixed cams)", color: "#6da8ff", dx: 14, dy: 22, anchor: "start" },
-    { x: 0.82, y: 0.50, r: 18, label: "Verity (drones)", color: "#6da8ff", dx: 16, dy: 6, anchor: "start" },
+  const pts = [
+    { x: 0.15, y: 0.22, r: 16, label: "Manual scanning", color: "#9aa7bd" },
+    { x: 0.66, y: 0.34, r: 16, label: "Dexory (AMR)", color: "#6da8ff" },
+    { x: 0.72, y: 0.28, r: 16, label: "Vimaan (fixed cams)", color: "#6da8ff" },
+    { x: 0.66, y: 0.46, r: 16, label: "Gather AI (drones)", color: "#6da8ff" },
+    { x: 0.72, y: 0.50, r: 16, label: "Corvus (drones)", color: "#6da8ff" },
+    { x: 0.86, y: 0.62, r: 16, label: "Verity (drones)", color: "#6da8ff" },
+    { x: 0.48, y: 0.78, r: 22, label: "Vayumetrics (software-first)", color: "#2b7cff" },
   ];
-
-  const W = 900, H = 520, pad = 56;
-  const fw = W - pad * 2, fh = H - pad * 2;
-  const X = (t: number) => pad + t * fw;       // left -> right
-  const Y = (t: number) => pad + (1 - t) * fh; // bottom -> top
-
-  const Label = ({
-    x, y, text, dx = 14, dy = -10, anchor = "start",
-  }: { x: number; y: number; text: string; dx?: number; dy?: number; anchor?: "start" | "middle" | "end" }) => {
-    const lx = x + dx, ly = y + dy;
-    const approxW = Math.min(280, Math.max(110, text.length * 7.2));
-    const approxH = 26;
-    const padX = 10, padY = 6;
-    const bx = anchor === "end" ? lx - approxW - padX : anchor === "middle" ? lx - approxW / 2 - padX : lx - padX;
-    const by = ly - approxH + 6;
-    return (
-      <g>
-        <line x1={x} y1={y} x2={lx - (anchor === "end" ? 6 : 0)} y2={ly - 6} stroke="#9db7ff" strokeWidth={1.5} />
-        <rect x={bx} y={by} rx={8} ry={8} width={approxW + padX * 2} height={approxH + padY * 2}
-              fill="#ffffff" stroke="#e6eefb" />
-        <text x={lx} y={ly} textAnchor={anchor} style={{ fill: "#1b2e58", fontWeight: 800, fontSize: 14 }}>
-          {text}
-        </text>
-      </g>
-    );
-  };
+  const W = 640, H = 360, pad = 42, fw = W - pad * 2, fh = H - pad * 2;
+  const X = (t: number) => pad + t * fw;
+  const Y = (t: number) => pad + (1 - t) * fh;
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="auto" aria-label="Competitor landscape">
-      <rect x="0" y="0" width={W} height={H} rx="22" fill="#fff" stroke="#e7effa" />
-      <rect x={pad} y={pad} width={fw} height={fh} rx="18" fill="#f8fbff" stroke="#e7effa" />
-
-      {/* Grid */}
-      <g stroke="#eaf2ff">
-        {[0.25, 0.5, 0.75].map((t, i) => <line key={`v${i}`} x1={X(t)} y1={pad} x2={X(t)} y2={pad + fh} />)}
-        {[0.25, 0.5, 0.75].map((t, i) => <line key={`h${i}`} x1={pad} y1={Y(t)} x2={pad + fw} y2={Y(t)} />)}
+    <svg viewBox={`0 0 ${W} ${H}`} className="svg" aria-label="Competitor landscape">
+      <rect x="0" y="0" width={W} height={H} rx="18" fill="#fff" stroke="#e6eefb" />
+      <rect x={pad} y={pad} width={fw} height={fh} rx="16" fill="#f7fbff" stroke="#e6eefb" />
+      <g stroke="#e9f1ff">
+        <line x1={pad} y1={pad + fh / 2} x2={pad + fw} y2={pad + fh / 2} />
+        <line x1={pad + fw / 2} y1={pad} x2={pad + fw / 2} y2={pad + fh} />
       </g>
-
-      {/* Axes + end labels */}
-      <g style={{ fill: "#243b6b", fontWeight: 900 }}>
-        <text x={pad + fw / 2} y={H - 18} textAnchor="middle" fontSize="16">
-          HARDWARE COST — LOW → HIGH
+      <g fill="#28406b" fontWeight={800} fontSize="12">
+        <text x={pad + fw / 2} y={H - 10} textAnchor="middle" className="axis">
+          HARDWARE COST → LOW ··· HIGH
         </text>
-        <text x={pad} y={H - 36} textAnchor="start" fontSize="12" style={{ fill: "#5a6f96", fontWeight: 800 }}>LOW</text>
-        <text x={pad + fw} y={H - 36} textAnchor="end" fontSize="12" style={{ fill: "#5a6f96", fontWeight: 800 }}>HIGH</text>
-
-        <text x="20" y={pad + fh / 2} transform={`rotate(-90 20 ${pad + fh / 2})`} textAnchor="middle" fontSize="16">
-          AUTOMATION — LOW → HIGH
+        <text x="16" y={pad + fh / 2} transform={`rotate(-90 16 ${pad + fh / 2})`} className="axis">
+          AUTOMATION → LOW ··· HIGH
         </text>
-        <text x={pad - 24} y={pad + fh} textAnchor="end" fontSize="12" style={{ fill: "#5a6f96", fontWeight: 800 }}>LOW</text>
-        <text x={pad - 24} y={pad + 10} textAnchor="end" fontSize="12" style={{ fill: "#5a6f96", fontWeight: 800 }}>HIGH</text>
       </g>
-
-      {/* Points + labels */}
-      {pts.map((p, i) => {
-        const cx = X(p.x), cy = Y(p.y);
-        return (
-          <g key={i}>
-            <circle
-              cx={cx} cy={cy} r={p.r}
-              fill={p.color}
-              stroke={p.hero ? "#1a5fe0" : "rgba(0,0,0,0)"}
-              strokeWidth={p.hero ? 2 : 0}
-              filter={p.hero ? "drop-shadow(0 4px 10px rgba(34,86,255,0.25))" : undefined}
-            />
-            <Label x={cx} y={cy} text={p.label} dx={p.dx} dy={p.dy} anchor={p.anchor} />
-          </g>
-        );
-      })}
-    </svg>
-  );
-};
-
-/** Market sizing — concentric TAM/SAM/SOM rings with side labels */
-const MarketSizing: React.FC<{
-  TAM?: string; SAM?: string; SOM?: string;
-  tamLabel?: string; samLabel?: string; somLabel?: string;
-}> = ({ TAM = "$40B", SAM = "$12B", SOM = "$1.2B", tamLabel = "Global warehouse & logistics automation", samLabel = "NA & EU cycle-count + audit automation", somLabel = "Initial target: mid/large warehouses" }) => {
-  const W = 900, H = 520;
-  const cx = W * 0.42, cy = H * 0.56;
-  const rT = 180, rS = 120, rO = 70;
-
-  const Label = ({ y, title, value, note }:{ y:number; title:string; value:string; note:string }) => (
-    <g>
-      <rect x={W*0.60} y={y-28} width={W*0.34} height={72} rx={12} fill="#fff" stroke="#e6eefb" />
-      <text x={W*0.77} y={y-6} textAnchor="middle" style={{fill:"#1b2e58",fontWeight:800,fontSize:16}}>{title}</text>
-      <text x={W*0.77} y={y+16} textAnchor="middle" style={{fill:"#2b7cff",fontWeight:900,fontSize:18}}>{value}</text>
-      <text x={W*0.77} y={y+36} textAnchor="middle" style={{fill:"#5a6f96",fontSize:12}}>{note}</text>
-    </g>
-  );
-
-  return (
-    <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="auto" aria-label="Market sizing TAM/SAM/SOM">
-      <rect x="0" y="0" width={W} height={H} rx="22" fill="#fff" stroke="#e7effa" />
-
-      {/* Rings */}
-      <g>
-        <circle cx={cx} cy={cy} r={rT} fill="#f2f7ff" stroke="#dfeaff" />
-        <circle cx={cx} cy={cy} r={rS} fill="#e7f0ff" stroke="#d3e2ff" />
-        <circle cx={cx} cy={cy} r={rO} fill="#d9e8ff" stroke="#c8ddff" />
-        <text x={cx} y={cy - rT - 14} textAnchor="middle" style={{fill:"#243b6b",fontWeight:900,fontSize:16}}>Market Opportunity</text>
-        <text x={cx} y={cy + 6} textAnchor="middle" style={{fill:"#1b2e58",fontWeight:800,fontSize:14}}>SOM</text>
-        <text x={cx} y={cy - rS + 18} textAnchor="middle" style={{fill:"#1b2e58",fontWeight:800,fontSize:14}}>SAM</text>
-        <text x={cx} y={cy - rT + 22} textAnchor="middle" style={{fill:"#1b2e58",fontWeight:800,fontSize:14}}>TAM</text>
-      </g>
-
-      {/* Side labels */}
-      <Label y={H*0.36} title="TAM" value={TAM} note={tamLabel} />
-      <Label y={H*0.56} title="SAM" value={SAM} note={samLabel} />
-      <Label y={H*0.76} title="SOM" value={SOM} note={somLabel} />
+      {pts.map((p, i) => (
+        <g key={i} transform={`translate(${X(p.x)}, ${Y(p.y)})`}>
+          <circle r={p.r} fill={p.color} />
+          <text x={p.r + 10} y="5" style={{ fill: "#1b2e58", fontSize: 13, fontWeight: 800 }}>
+            {p.label}
+          </text>
+        </g>
+      ))}
     </svg>
   );
 };
@@ -267,7 +212,7 @@ const MarketSizing: React.FC<{
 /* ===========================
    Slides
 =========================== */
-function makeSlides(next: (index: number) => void): Slide[] {
+function makeSlides(next: (n: number) => void): Slide[] {
   return [
     // 0 — VIDEO COVER
     {
@@ -290,7 +235,7 @@ function makeSlides(next: (index: number) => void): Slide[] {
         "Quarter-end firefighting: expedites, overtime, write-offs.",
         "Leaders lack a live, spatial view across sites.",
       ],
-      visual: <img className="visual-img" src={asset("problem.png")} alt="Problem" />,
+      visual: <Img className="visual-img" src="problem.png" alt="Problem" />,
     },
 
     // 2 — SOLUTION
@@ -302,10 +247,10 @@ function makeSlides(next: (index: number) => void): Slide[] {
         "Computer vision reads labels & shelf state; Pro adds LiDAR.",
         "WMS reconciliation + photo-proof exception lists each morning.",
       ],
-      visual: <img className="visual-img" src={asset("Solution.png")} alt="Solution" />,
+      visual: <Img className="visual-img" src="Solution.png" alt="Solution" />,
     },
 
-    // 3 — PRODUCT: 3D DIGITAL TWIN
+    // 3 — PRODUCT (3D digital twin)
     {
       tag: "PRODUCT",
       title: "Searchable, spatial 3D digital twin",
@@ -314,7 +259,7 @@ function makeSlides(next: (index: number) => void): Slide[] {
         "Search by SKU, pallet, or bay; jump to photo evidence.",
         "Cross-site rollups with freshness indicators.",
       ],
-      visual: <img className="visual-img" src={asset("3Dt.png")} alt="3Dt" />,
+      visual: <Img className="visual-img" src="3Dt.png" alt="3D digital twin" />,
     },
 
     // 4 — HOW IT WORKS
@@ -326,24 +271,17 @@ function makeSlides(next: (index: number) => void): Slide[] {
         "Scan: night flights capture labels & shelf state.",
         "Analyze: WMS reconciliation & workflows; twin updates.",
       ],
-      visual: <img className="visual-img" src={asset("How_solution_works.png")} alt="How solution works" />,
+      visual: <Img className="visual-img" src="How_solution_works.png" alt="How it works" />,
     },
 
-    // 5 — BENEFITS 1 (image only)
+    // 5 — BENEFITS (image only; no bullets)
     {
       tag: "BENEFITS",
       title: "Measurable impact from week one",
-      visual: <img className="visual-img" src={asset("B1.png")} alt="Benefits" />,
+      visual: <Img className="visual-img fullbleed" src="B1.png" alt="Key benefits" />,
     },
 
-    // 6 — BENEFITS 2 (image only)
-    {
-      tag: "BENEFITS",
-      title: "Security • Privacy • Guardrails",
-      visual: <img className="visual-img" src={asset("S1.png")} alt="Security & privacy" />,
-    },
-
-    // 7 — ARCHITECTURE
+    // 6 — ARCHITECTURE
     {
       tag: "ARCHITECTURE",
       title: "Drone → Edge → Cloud → WMS",
@@ -352,10 +290,10 @@ function makeSlides(next: (index: number) => void): Slide[] {
         "Role-based access; SSO; audit logs",
         "Connectors for common WMS/ERP",
       ],
-      visual: <img className="visual-img" src={asset("system_architecture.png")} alt="System architecture" />,
+      visual: <Img className="visual-img" src="system_architecture.png" alt="System architecture" />,
     },
 
-    // 8 — COMPETITION (clear map)
+    // 7 — COMPETITION
     {
       tag: "COMPETITION",
       title: "Automation vs hardware cost — where we win",
@@ -367,82 +305,33 @@ function makeSlides(next: (index: number) => void): Slide[] {
       visual: <CompetitorMap />,
     },
 
-    // 9 — MARKET (NEW)
-    {
-      tag: "MARKET",
-      title: "TAM / SAM / SOM",
-      bullets: [
-        "Clear wedge from global spend → obtainable customers.",
-        "Focus: mid/large warehouses (200k–700k sq ft) with nightly counts.",
-        "Land with pilot; expand cross-aisle and cross-site.",
-      ],
-      visual: <MarketSizing TAM="$40B" SAM="$12B" SOM="$1.2B" />,
-      footnote: "Sources: industry reports (e.g., LogisticsIQ, Gartner); internal bottom-up sizing.",
-    },
-
-    // 10 — PRICING (two equal squares)
+    // 8 — PRICING (two equal cards)
     {
       tag: "PRICING",
       title: "Two SKUs & usage that tracks value",
-      className: "pricing",
       bullets: ["90-day paid pilot with opt-to-buy credit to Year-1."],
-      visual: (
-        <div className="price-grid">
-          {/* Vision */}
-          <article className="price-card vision" aria-label="Vision plan">
-            <span className="badge">VISION</span>
-            <h3>Camera-first coverage</h3>
-            <div className="price">$18k–$24k / site / yr</div>
-            <ul className="features">
-              <li>Night scans; zero disruption</li>
-              <li>WMS reconciliation &amp; reports</li>
-              <li>Usage-based — capped</li>
-            </ul>
-            <div className="card-foot">
-              <span className="hint">Best for single-site or pilots</span>
-            </div>
-          </article>
-
-          {/* Pro */}
-          <article className="price-card pro" aria-label="Pro (LiDAR) plan">
-            <span className="badge">PRO (LiDAR)</span>
-            <h3>Highest accuracy &amp; coverage</h3>
-            <div className="price">$36k+ / site / yr</div>
-            <ul className="features">
-              <li>Spatial 3D twin + shelf state</li>
-              <li>Advanced exception workflows</li>
-              <li>Usage-based — capped</li>
-            </ul>
-            <div className="card-foot">
-              <span className="hint">Multi-aisle / multi-site scale</span>
-            </div>
-          </article>
-        </div>
-      ),
+      visual: <PricingCards />,
     },
 
-    // 11 — ROI (visual full-width below text)
+    // 9 — ROI (full-width under text)
     {
       tag: "ROI",
       title: "Back-of-the-envelope ROI",
-      className: "roi-below",
-      visual: <ROI />,
       bullets: ["Adjust locations, cycles, and rates to match your site."],
+      visual: <ROI />,
     },
 
-    // 12 — TEAM
+    // 10 — TEAM
     {
       tag: "TEAM",
       title: "Neel Desai — Founder & CEO",
       bullets: [
         "Founder, Vayumetrics • Logistics Engineer, Volvo Mack Trucks",
-        "M.Eng. Engineering Management, B.S. Mechanical Engineering — Lean Six Sigma GB certified",
-        "Process optimization & product design; hands-on with SolidWorks, AutoCAD, CNC programming",
+        "M.Eng. Eng. Management, B.S. Mech. Eng. — Lean Six Sigma GB",
         'LinkedIn: <a href="https://www.linkedin.com/in/neel-arvind-desai/" target="_blank">linkedin.com/in/neel-arvind-desai</a>',
-        'Email: <a href="mailto:neel8636@gmail.com">neel8636@gmail.com</a>',
-        "Phone: +1 (781)-824-1614",
+        'Email: <a href="mailto:neel8636@gmail.com">neel8636@gmail.com</a> • Phone: +1 (781)-824-1614',
       ],
-      visual: <img className="founder" src={asset("Neel_ph.jpg")} alt="Neel Desai" />,
+      visual: <Img className="founder" src="Neel_ph.jpg" alt="Neel Desai" />,
     },
   ];
 }
@@ -456,109 +345,75 @@ export default function App() {
   const total = slides.length;
   const s = slides[i];
 
-  // Keyboard nav + hash sync (industrial-grade nicety)
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "ArrowRight") setI((x) => Math.min(total - 1, x + 1));
-      if (e.key === "ArrowLeft") setI((x) => Math.max(0, x - 1));
-    };
-    const onHash = () => {
-      const n = Number(location.hash.replace(/^#/, ""));
-      if (!Number.isNaN(n)) setI(Math.min(total - 1, Math.max(0, n)));
+      if (e.key === "ArrowRight") setI((n) => Math.min(total - 1, n + 1));
+      if (e.key === "ArrowLeft") setI((n) => Math.max(0, n - 1));
     };
     window.addEventListener("keydown", onKey);
-    window.addEventListener("hashchange", onHash);
-    onHash();
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      window.removeEventListener("hashchange", onHash);
-    };
+    return () => window.removeEventListener("keydown", onKey);
   }, [total]);
-
-  useEffect(() => {
-    const id = setTimeout(() => {
-      if (location.hash !== `#${i}`) history.replaceState(null, "", `#${i}`);
-    }, 0);
-    return () => clearTimeout(id);
-  }, [i]);
-
-  const hasText =
-    Boolean(s.bullets && s.bullets.length) ||
-    Boolean(s.ctas && s.ctas.length) ||
-    Boolean(s.footnote);
 
   return (
     <div className="deck">
       <header className="topbar">
         <div className="brand" onClick={() => setI(0)} title="Back to cover">
-          <img src={asset("VL.png")} alt="VL" style={{ height: "80px", objectFit: "contain" }} />
+          <img src={asset("VL.png")} alt="VL" style={{ height: 80, objectFit: "contain" }} />
         </div>
         <nav className="menu">
-          <a href="/">Website</a>
-          <a href="mailto:neel8636@gmail.com">
-            <Mail size={16} /> Contact
-          </a>
+          <a href={`${base}/site/`}>Website</a>
+          <a href="mailto:neel8636@gmail.com"><Mail size={16} /> Contact</a>
         </nav>
       </header>
 
       <main className="stage">
         <div className="meta">
           <div className="eyebrow">{s.tag ?? "CONFIDENTIAL • 2025"}</div>
-          <div className="counter">
-            {i + 1} / {total}
-          </div>
+          <div className="counter">{i + 1} / {total}</div>
         </div>
 
         <article className={`card ${s.className ?? ""}`}>
           {s.title && <h1 className="title">{s.title}</h1>}
 
-          <div className={`grid ${s.visual && hasText ? "has-visual" : ""}`}>
-            {hasText && (
-              <div className="text">
-                {s.bullets && (
-                  <ul
-                    className="bullets"
-                    dangerouslySetInnerHTML={{
-                      __html: s.bullets.map((b) => `<li>${b}</li>`).join(""),
-                    }}
-                  />
-                )}
-                {s.ctas && (
-                  <div className="cta-row">
-                    {s.ctas.map((c, idx) =>
-                      c.href ? (
-                        <a className={`btn ${c.primary ? "primary" : ""}`} key={idx} href={c.href}>
-                          {c.label} {c.href?.startsWith("http") && <ExternalLink size={14} />}
-                        </a>
-                      ) : (
-                        <button
-                          className={`btn ${c.primary ? "primary" : ""}`}
-                          key={idx}
-                          onClick={c.onClick || (() => setI(Math.min(total - 1, i + 1)))}
-                        >
-                          {c.label}
-                        </button>
-                      )
-                    )}
-                  </div>
-                )}
-                {s.footnote && <div className="footnote" dangerouslySetInnerHTML={{ __html: s.footnote }} />}
-              </div>
-            )}
+          <div className={`grid ${s.visual ? "has-visual" : ""}`}>
+            <div className="text">
+              {s.bullets && (
+                <ul
+                  className="bullets"
+                  dangerouslySetInnerHTML={{ __html: s.bullets.map((b) => `<li>${b}</li>`).join("") }}
+                />
+              )}
+              {s.ctas && (
+                <div className="cta-row">
+                  {s.ctas.map((c, idx) =>
+                    c.href ? (
+                      <a className={`btn ${c.primary ? "primary" : ""}`} key={idx} href={c.href}>
+                        {c.label} {c.href?.startsWith("http") && <ExternalLink size={14} />}
+                      </a>
+                    ) : (
+                      <button className={`btn ${c.primary ? "primary" : ""}`} key={idx} onClick={c.onClick}>
+                        {c.label}
+                      </button>
+                    )
+                  )}
+                </div>
+              )}
+              {s.footnote && <div className="footnote" dangerouslySetInnerHTML={{ __html: s.footnote }} />}
+            </div>
 
             {s.visual && <div className="visual">{s.visual}</div>}
           </div>
 
-          {i > 0 && (
-            <button className="nav left" onClick={() => setI(Math.max(0, i - 1))} aria-label="Previous">
-              <ArrowLeft />
-            </button>
-          )}
-          {i < total - 1 && (
-            <button className="nav right" onClick={() => setI(Math.min(total - 1, i + 1))} aria-label="Next">
-              <ArrowRight />
-            </button>
-          )}
+        {i > 0 && (
+          <button className="nav left" onClick={() => setI(Math.max(0, i - 1))} aria-label="Previous">
+            <ArrowLeft />
+          </button>
+        )}
+        {i < total - 1 && (
+          <button className="nav right" onClick={() => setI(Math.min(total - 1, i + 1))} aria-label="Next">
+            <ArrowRight />
+          </button>
+        )}
         </article>
 
         <footer className="legal">© 2025 Vayumetrics. All rights reserved.</footer>
