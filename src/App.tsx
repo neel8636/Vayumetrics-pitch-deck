@@ -1,4 +1,3 @@
-// src/App.tsx
 import React, { useEffect, useState } from "react";
 import { ArrowLeft, ArrowRight, ExternalLink, Mail } from "lucide-react";
 import "./deck.css";
@@ -21,12 +20,11 @@ type Slide = {
    Helpers (cache-bust)
 =========================== */
 // cache-bust (bump whenever you change media)
-const v = "?v=22";
+const v = "?v=23";
 
 // Safe path join using the repo base path Vite injects
 const base = (import.meta.env.BASE_URL || "/").replace(/\/+$/, "");
-const asset = (p: string) =>
-  `${base}/${String(p).replace(/^\/+/, "")}${v}`;
+const asset = (p: string) => `${base}/${String(p).replace(/^\/+/, "")}${v}`;
 
 
 /* ===========================
@@ -225,6 +223,47 @@ const CompetitorMap: React.FC = () => {
   );
 };
 
+/** Market sizing — concentric TAM/SAM/SOM rings with side labels */
+const MarketSizing: React.FC<{
+  TAM?: string; SAM?: string; SOM?: string;
+  tamLabel?: string; samLabel?: string; somLabel?: string;
+}> = ({ TAM = "$40B", SAM = "$12B", SOM = "$1.2B", tamLabel = "Global warehouse & logistics automation", samLabel = "NA & EU cycle-count + audit automation", somLabel = "Initial target: mid/large warehouses" }) => {
+  const W = 900, H = 520;
+  const cx = W * 0.42, cy = H * 0.56;
+  const rT = 180, rS = 120, rO = 70;
+
+  const Label = ({ y, title, value, note }:{ y:number; title:string; value:string; note:string }) => (
+    <g>
+      <rect x={W*0.60} y={y-28} width={W*0.34} height={72} rx={12} fill="#fff" stroke="#e6eefb" />
+      <text x={W*0.77} y={y-6} textAnchor="middle" style={{fill:"#1b2e58",fontWeight:800,fontSize:16}}>{title}</text>
+      <text x={W*0.77} y={y+16} textAnchor="middle" style={{fill:"#2b7cff",fontWeight:900,fontSize:18}}>{value}</text>
+      <text x={W*0.77} y={y+36} textAnchor="middle" style={{fill:"#5a6f96",fontSize:12}}>{note}</text>
+    </g>
+  );
+
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="auto" aria-label="Market sizing TAM/SAM/SOM">
+      <rect x="0" y="0" width={W} height={H} rx="22" fill="#fff" stroke="#e7effa" />
+
+      {/* Rings */}
+      <g>
+        <circle cx={cx} cy={cy} r={rT} fill="#f2f7ff" stroke="#dfeaff" />
+        <circle cx={cx} cy={cy} r={rS} fill="#e7f0ff" stroke="#d3e2ff" />
+        <circle cx={cx} cy={cy} r={rO} fill="#d9e8ff" stroke="#c8ddff" />
+        <text x={cx} y={cy - rT - 14} textAnchor="middle" style={{fill:"#243b6b",fontWeight:900,fontSize:16}}>Market Opportunity</text>
+        <text x={cx} y={cy + 6} textAnchor="middle" style={{fill:"#1b2e58",fontWeight:800,fontSize:14}}>SOM</text>
+        <text x={cx} y={cy - rS + 18} textAnchor="middle" style={{fill:"#1b2e58",fontWeight:800,fontSize:14}}>SAM</text>
+        <text x={cx} y={cy - rT + 22} textAnchor="middle" style={{fill:"#1b2e58",fontWeight:800,fontSize:14}}>TAM</text>
+      </g>
+
+      {/* Side labels */}
+      <Label y={H*0.36} title="TAM" value={TAM} note={tamLabel} />
+      <Label y={H*0.56} title="SAM" value={SAM} note={samLabel} />
+      <Label y={H*0.76} title="SOM" value={SOM} note={somLabel} />
+    </svg>
+  );
+};
+
 /* ===========================
    Slides
 =========================== */
@@ -328,7 +367,20 @@ function makeSlides(next: (index: number) => void): Slide[] {
       visual: <CompetitorMap />,
     },
 
-    // 9 — PRICING (two equal squares)
+    // 9 — MARKET (NEW)
+    {
+      tag: "MARKET",
+      title: "TAM / SAM / SOM",
+      bullets: [
+        "Clear wedge from global spend → obtainable customers.",
+        "Focus: mid/large warehouses (200k–700k sq ft) with nightly counts.",
+        "Land with pilot; expand cross-aisle and cross-site.",
+      ],
+      visual: <MarketSizing TAM="$40B" SAM="$12B" SOM="$1.2B" />,
+      footnote: "Sources: industry reports (e.g., LogisticsIQ, Gartner); internal bottom-up sizing.",
+    },
+
+    // 10 — PRICING (two equal squares)
     {
       tag: "PRICING",
       title: "Two SKUs & usage that tracks value",
@@ -369,7 +421,7 @@ function makeSlides(next: (index: number) => void): Slide[] {
       ),
     },
 
-    // 10 — ROI (visual full-width below text)
+    // 11 — ROI (visual full-width below text)
     {
       tag: "ROI",
       title: "Back-of-the-envelope ROI",
@@ -378,7 +430,7 @@ function makeSlides(next: (index: number) => void): Slide[] {
       bullets: ["Adjust locations, cycles, and rates to match your site."],
     },
 
-    // 11 — TEAM
+    // 12 — TEAM
     {
       tag: "TEAM",
       title: "Neel Desai — Founder & CEO",
@@ -404,14 +456,31 @@ export default function App() {
   const total = slides.length;
   const s = slides[i];
 
+  // Keyboard nav + hash sync (industrial-grade nicety)
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "ArrowRight") setI((x) => Math.min(total - 1, x + 1));
       if (e.key === "ArrowLeft") setI((x) => Math.max(0, x - 1));
     };
+    const onHash = () => {
+      const n = Number(location.hash.replace(/^#/, ""));
+      if (!Number.isNaN(n)) setI(Math.min(total - 1, Math.max(0, n)));
+    };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    window.addEventListener("hashchange", onHash);
+    onHash();
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("hashchange", onHash);
+    };
   }, [total]);
+
+  useEffect(() => {
+    const id = setTimeout(() => {
+      if (location.hash !== `#${i}`) history.replaceState(null, "", `#${i}`);
+    }, 0);
+    return () => clearTimeout(id);
+  }, [i]);
 
   const hasText =
     Boolean(s.bullets && s.bullets.length) ||
