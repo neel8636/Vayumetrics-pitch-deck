@@ -6,25 +6,22 @@ import "./deck.css";
 /* ===========================
    Types
 =========================== */
+type Cta = { label: string; href?: string; onClick?: () => void; primary?: boolean };
 type Slide = {
   tag?: string;
   title?: string;
   bullets?: string[];
   visual?: React.ReactNode;
   footnote?: string;
-  ctas?: { label: string; href?: string; onClick?: () => void; primary?: boolean }[];
+  className?: string;
+  ctas?: Cta[];
 };
 
 /* ===========================
-   Helpers
-   - bump 'v' to bust browser cache
+   Helpers (cache-bust)
 =========================== */
-// bump this when you change images/video to bust cache
-const v = '?v=15';
-
-// Use Vite's BASE_URL so paths work on GitHub Pages subpath
-const base = (import.meta as any).env?.BASE_URL ?? '/';
-const asset = (file: string) => `${base}${file}${v}`;
+const v = "?v=16";
+const asset = (file: string) => `${import.meta.env.BASE_URL}${file}${v}`;
 
 /* ===========================
    Widgets
@@ -72,10 +69,7 @@ function ROI() {
     <div className="roi">
       <h3 style={{ marginBottom: 12 }}>ROI calculator</h3>
 
-      <div
-        className="roi-wrap"
-        style={{ display: "grid", gridTemplateColumns: "minmax(260px,1fr) 2fr", gap: 16 }}
-      >
+      <div className="roi-wrap" style={{ display: "grid", gridTemplateColumns: "minmax(260px,1fr) 2fr", gap: 16 }}>
         <aside
           className="roi-legend"
           style={{ border: "1px solid var(--line)", borderRadius: 12, padding: 12, background: "#fff" }}
@@ -136,75 +130,91 @@ function ROI() {
   );
 }
 
-const PricingCards: React.FC = () => (
-  <div className="pricing-cards">
-    <div className="pcard">
-      <div className="ptier">Vision</div>
-      <div className="pprice">
-        $18k–$24k<span className="psub">/site/yr</span>
-      </div>
-      <ul className="pbullets">
-        <li>Camera-first coverage</li>
-        <li>Night scans; zero disruption</li>
-        <li>WMS reconciliation &amp; reports</li>
-        <li>Usage-based — capped</li>
-      </ul>
-    </div>
-    <div className="pcard featured">
-      <div className="ptier">Pro (LiDAR)</div>
-      <div className="pprice">
-        $36k+<span className="psub">/site/yr</span>
-      </div>
-      <ul className="pbullets">
-        <li>Highest accuracy &amp; coverage</li>
-        <li>Spatial 3D twin + shelf state</li>
-        <li>Advanced exception workflows</li>
-        <li>Usage-based — capped</li>
-      </ul>
-    </div>
-  </div>
-);
-
-/** simplified competition map (pure SVG) */
+/** Clear competitor landscape with legible labels & correct axes */
 const CompetitorMap: React.FC = () => {
-  const pts = [
-    { x: 0.15, y: 0.22, r: 16, label: "Manual scanning", color: "#9aa7bd" },
-    { x: 0.66, y: 0.34, r: 16, label: "Dexory (AMR)", color: "#6da8ff" },
-    { x: 0.72, y: 0.28, r: 16, label: "Vimaan (fixed cams)", color: "#6da8ff" },
-    { x: 0.66, y: 0.46, r: 16, label: "Gather AI (drones)", color: "#6da8ff" },
-    { x: 0.72, y: 0.50, r: 16, label: "Corvus (drones)", color: "#6da8ff" },
-    { x: 0.86, y: 0.62, r: 16, label: "Verity (drones)", color: "#6da8ff" },
-    { x: 0.48, y: 0.78, r: 22, label: "Vayumetrics (software-first)", color: "#2b7cff", hero: true },
+  type Pt = {
+    x: number; y: number; r: number; label: string; color: string;
+    hero?: boolean; dx?: number; dy?: number; anchor?: "start" | "middle" | "end";
+  };
+
+  const pts: Pt[] = [
+    { x: 0.15, y: 0.15, r: 16, label: "Manual scanning", color: "#9aa7bd", dx: 16, dy: 6, anchor: "start" },
+    { x: 0.48, y: 0.62, r: 26, label: "Vayumetrics (software-first)", color: "#2b7cff", hero: true, dx: 18, dy: -18, anchor: "start" },
+    { x: 0.68, y: 0.42, r: 16, label: "Corvus (drones)", color: "#6da8ff", dx: 14, dy: -6, anchor: "start" },
+    { x: 0.62, y: 0.40, r: 16, label: "Gather AI (drones)", color: "#6da8ff", dx: 14, dy: 18, anchor: "start" },
+    { x: 0.64, y: 0.30, r: 16, label: "Dexory (AMR)", color: "#6da8ff", dx: 14, dy: 22, anchor: "start" },
+    { x: 0.66, y: 0.26, r: 16, label: "Vimaan (fixed cams)", color: "#6da8ff", dx: 14, dy: 22, anchor: "start" },
+    { x: 0.82, y: 0.50, r: 18, label: "Verity (drones)", color: "#6da8ff", dx: 16, dy: 6, anchor: "start" },
   ];
-  const W = 640, H = 360, pad = 42;
+
+  const W = 900, H = 520, pad = 56;
   const fw = W - pad * 2, fh = H - pad * 2;
-  const X = (t: number) => pad + t * fw;
-  const Y = (t: number) => pad + (1 - t) * fh;
+  const X = (t: number) => pad + t * fw;       // left -> right
+  const Y = (t: number) => pad + (1 - t) * fh; // bottom -> top
+
+  const Label = ({
+    x, y, text, dx = 14, dy = -10, anchor = "start",
+  }: { x: number; y: number; text: string; dx?: number; dy?: number; anchor?: "start" | "middle" | "end" }) => {
+    const lx = x + dx, ly = y + dy;
+    const approxW = Math.min(280, Math.max(110, text.length * 7.2));
+    const approxH = 26;
+    const padX = 10, padY = 6;
+    const bx = anchor === "end" ? lx - approxW - padX : anchor === "middle" ? lx - approxW / 2 - padX : lx - padX;
+    const by = ly - approxH + 6;
+    return (
+      <g>
+        <line x1={x} y1={y} x2={lx - (anchor === "end" ? 6 : 0)} y2={ly - 6} stroke="#9db7ff" strokeWidth={1.5} />
+        <rect x={bx} y={by} rx={8} ry={8} width={approxW + padX * 2} height={approxH + padY * 2}
+              fill="#ffffff" stroke="#e6eefb" />
+        <text x={lx} y={ly} textAnchor={anchor} style={{ fill: "#1b2e58", fontWeight: 800, fontSize: 14 }}>
+          {text}
+        </text>
+      </g>
+    );
+  };
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="svg" aria-label="Competitor landscape">
-      <rect x="0" y="0" width={W} height={H} rx="18" fill="#fff" stroke="#e6eefb" />
-      <rect x={pad} y={pad} width={fw} height={fh} rx="16" fill="#f7fbff" stroke="#e6eefb" />
-      <g stroke="#e9f1ff">
-        <line x1={pad} y1={pad + fh / 2} x2={pad + fw} y2={pad + fh / 2} />
-        <line x1={pad + fw / 2} y1={pad} x2={pad + fw / 2} y2={pad + fh} />
+    <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="auto" aria-label="Competitor landscape">
+      <rect x="0" y="0" width={W} height={H} rx="22" fill="#fff" stroke="#e7effa" />
+      <rect x={pad} y={pad} width={fw} height={fh} rx="18" fill="#f8fbff" stroke="#e7effa" />
+
+      {/* Grid */}
+      <g stroke="#eaf2ff">
+        {[0.25, 0.5, 0.75].map((t, i) => <line key={`v${i}`} x1={X(t)} y1={pad} x2={X(t)} y2={pad + fh} />)}
+        {[0.25, 0.5, 0.75].map((t, i) => <line key={`h${i}`} x1={pad} y1={Y(t)} x2={pad + fw} y2={Y(t)} />)}
       </g>
-      <g fill="#28406b" fontWeight={800} fontSize="12">
-        <text x={pad + fw / 2} y={H - 10} textAnchor="middle" className="axis">
-          HARDWARE COST → LOW ··· HIGH
+
+      {/* Axes + end labels */}
+      <g style={{ fill: "#243b6b", fontWeight: 900 }}>
+        <text x={pad + fw / 2} y={H - 18} textAnchor="middle" fontSize="16">
+          HARDWARE COST — LOW → HIGH
         </text>
-        <text x="16" y={pad + fh / 2} transform={`rotate(-90 16 ${pad + fh / 2})`} className="axis">
-          AUTOMATION → LOW ··· HIGH
+        <text x={pad} y={H - 36} textAnchor="start" fontSize="12" style={{ fill: "#5a6f96", fontWeight: 800 }}>LOW</text>
+        <text x={pad + fw} y={H - 36} textAnchor="end" fontSize="12" style={{ fill: "#5a6f96", fontWeight: 800 }}>HIGH</text>
+
+        <text x="20" y={pad + fh / 2} transform={`rotate(-90 20 ${pad + fh / 2})`} textAnchor="middle" fontSize="16">
+          AUTOMATION — LOW → HIGH
         </text>
+        <text x={pad - 24} y={pad + fh} textAnchor="end" fontSize="12" style={{ fill: "#5a6f96", fontWeight: 800 }}>LOW</text>
+        <text x={pad - 24} y={pad + 10} textAnchor="end" fontSize="12" style={{ fill: "#5a6f96", fontWeight: 800 }}>HIGH</text>
       </g>
-      {pts.map((p, i) => (
-        <g key={i} transform={`translate(${X(p.x)}, ${Y(p.y)})`}>
-          <circle r={p.r} fill={p.color} stroke={p.hero ? "#1a5fe0" : "none"} strokeWidth={p.hero ? 2 : 0} />
-          <text x={p.r + 10} y="5" style={{ fill: "#1b2e58", fontSize: 13, fontWeight: p.hero ? 900 : 700 }}>
-            {p.label}
-          </text>
-        </g>
-      ))}
+
+      {/* Points + labels */}
+      {pts.map((p, i) => {
+        const cx = X(p.x), cy = Y(p.y);
+        return (
+          <g key={i}>
+            <circle
+              cx={cx} cy={cy} r={p.r}
+              fill={p.color}
+              stroke={p.hero ? "#1a5fe0" : "rgba(0,0,0,0)"}
+              strokeWidth={p.hero ? 2 : 0}
+              filter={p.hero ? "drop-shadow(0 4px 10px rgba(34,86,255,0.25))" : undefined}
+            />
+            <Label x={cx} y={cy} text={p.label} dx={p.dx} dy={p.dy} anchor={p.anchor} />
+          </g>
+        );
+      })}
     </svg>
   );
 };
@@ -216,6 +226,7 @@ function makeSlides(next: (index: number) => void): Slide[] {
   return [
     // 0 — VIDEO COVER
     {
+      tag: "VAYUMETRICS",
       visual: <VideoHero />,
       bullets: ["Autonomous drone scanning • Real-time inventory • Spatial 3D twin"],
       ctas: [
@@ -273,20 +284,18 @@ function makeSlides(next: (index: number) => void): Slide[] {
       visual: <img className="visual-img" src={asset("How_solution_works.png")} alt="How solution works" />,
     },
 
-    // 5 — BENEFITS 1
+    // 5 — BENEFITS 1 (image only)
     {
       tag: "BENEFITS",
       title: "Measurable impact from week one",
-      bullets: ["≥50% fewer count hours", "Exception-driven mornings", "Improves accuracy and OTIF"],
-      visual: <img className="visual-img" src={asset("B1.png")} alt="B1" />,
+      visual: <img className="visual-img" src={asset("B1.png")} alt="Benefits" />,
     },
 
-    // 6 — BENEFITS 2
+    // 6 — BENEFITS 2 (image only)
     {
       tag: "BENEFITS",
       title: "Security • Privacy • Guardrails",
-      bullets: ["Warehouse-only capture", "Access controls & encryption", "Compliance-first design"],
-      visual: <img className="visual-img" src={asset("S1.png")} alt="S1" />,
+      visual: <img className="visual-img" src={asset("S1.png")} alt="Security & privacy" />,
     },
 
     // 7 — ARCHITECTURE
@@ -301,7 +310,7 @@ function makeSlides(next: (index: number) => void): Slide[] {
       visual: <img className="visual-img" src={asset("system_architecture.png")} alt="System architecture" />,
     },
 
-    // 8 — COMPETITION
+    // 8 — COMPETITION (clear map)
     {
       tag: "COMPETITION",
       title: "Automation vs hardware cost — where we win",
@@ -313,18 +322,52 @@ function makeSlides(next: (index: number) => void): Slide[] {
       visual: <CompetitorMap />,
     },
 
-    // 9 — PRICING
+    // 9 — PRICING (two equal squares)
     {
       tag: "PRICING",
       title: "Two SKUs & usage that tracks value",
+      className: "pricing",
       bullets: ["90-day paid pilot with opt-to-buy credit to Year-1."],
-      visual: <PricingCards />,
+      visual: (
+        <div className="price-grid">
+          {/* Vision */}
+          <article className="price-card vision" aria-label="Vision plan">
+            <span className="badge">VISION</span>
+            <h3>Camera-first coverage</h3>
+            <div className="price">$18k–$24k / site / yr</div>
+            <ul className="features">
+              <li>Night scans; zero disruption</li>
+              <li>WMS reconciliation &amp; reports</li>
+              <li>Usage-based — capped</li>
+            </ul>
+            <div className="card-foot">
+              <span className="hint">Best for single-site or pilots</span>
+            </div>
+          </article>
+
+          {/* Pro */}
+          <article className="price-card pro" aria-label="Pro (LiDAR) plan">
+            <span className="badge">PRO (LiDAR)</span>
+            <h3>Highest accuracy &amp; coverage</h3>
+            <div className="price">$36k+ / site / yr</div>
+            <ul className="features">
+              <li>Spatial 3D twin + shelf state</li>
+              <li>Advanced exception workflows</li>
+              <li>Usage-based — capped</li>
+            </ul>
+            <div className="card-foot">
+              <span className="hint">Multi-aisle / multi-site scale</span>
+            </div>
+          </article>
+        </div>
+      ),
     },
 
-    // 10 — ROI
+    // 10 — ROI (visual full-width below text)
     {
       tag: "ROI",
       title: "Back-of-the-envelope ROI",
+      className: "roi-below",
       visual: <ROI />,
       bullets: ["Adjust locations, cycles, and rates to match your site."],
     },
@@ -356,23 +399,24 @@ export default function App() {
   const s = slides[i];
 
   useEffect(() => {
-    const k = (e: KeyboardEvent) => {
+    const onKey = (e: KeyboardEvent) => {
       if (e.key === "ArrowRight") setI((x) => Math.min(total - 1, x + 1));
       if (e.key === "ArrowLeft") setI((x) => Math.max(0, x - 1));
     };
-    window.addEventListener("keydown", k);
-    return () => window.removeEventListener("keydown", k);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
   }, [total]);
+
+  const hasText =
+    Boolean(s.bullets && s.bullets.length) ||
+    Boolean(s.ctas && s.ctas.length) ||
+    Boolean(s.footnote);
 
   return (
     <div className="deck">
       <header className="topbar">
         <div className="brand" onClick={() => setI(0)} title="Back to cover">
-          <img
-            src={asset("VL.png")}
-            alt="VL"
-            style={{ height: "80px", objectFit: "contain" }} /* make it big */
-          />
+          <img src={asset("VL.png")} alt="VL" style={{ height: "80px", objectFit: "contain" }} />
         </div>
         <nav className="menu">
           <a href="/">Website</a>
@@ -385,41 +429,47 @@ export default function App() {
       <main className="stage">
         <div className="meta">
           <div className="eyebrow">{s.tag ?? "CONFIDENTIAL • 2025"}</div>
-          <div className="counter">{i + 1} / {total}</div>
+          <div className="counter">
+            {i + 1} / {total}
+          </div>
         </div>
 
-        <article className="card">
+        <article className={`card ${s.className ?? ""}`}>
           {s.title && <h1 className="title">{s.title}</h1>}
 
-          <div className={`grid ${s.visual ? "has-visual" : ""}`}>
-            <div className="text">
-              {s.bullets && (
-                <ul
-                  className="bullets"
-                  dangerouslySetInnerHTML={{ __html: s.bullets.map((b) => `<li>${b}</li>`).join("") }}
-                />
-              )}
-              {s.ctas && (
-                <div className="cta-row">
-                  {s.ctas.map((c, idx) =>
-                    c.href ? (
-                      <a className={`btn ${c.primary ? "primary" : ""}`} key={idx} href={c.href}>
-                        {c.label} {c.href?.startsWith("http") && <ExternalLink size={14} />}
-                      </a>
-                    ) : (
-                      <button
-                        className={`btn ${c.primary ? "primary" : ""}`}
-                        key={idx}
-                        onClick={c.onClick || (() => setI(Math.min(total - 1, i + 1)))}
-                      >
-                        {c.label}
-                      </button>
-                    )
-                  )}
-                </div>
-              )}
-              {s.footnote && <div className="footnote" dangerouslySetInnerHTML={{ __html: s.footnote }} />}
-            </div>
+          <div className={`grid ${s.visual && hasText ? "has-visual" : ""}`}>
+            {hasText && (
+              <div className="text">
+                {s.bullets && (
+                  <ul
+                    className="bullets"
+                    dangerouslySetInnerHTML={{
+                      __html: s.bullets.map((b) => `<li>${b}</li>`).join(""),
+                    }}
+                  />
+                )}
+                {s.ctas && (
+                  <div className="cta-row">
+                    {s.ctas.map((c, idx) =>
+                      c.href ? (
+                        <a className={`btn ${c.primary ? "primary" : ""}`} key={idx} href={c.href}>
+                          {c.label} {c.href?.startsWith("http") && <ExternalLink size={14} />}
+                        </a>
+                      ) : (
+                        <button
+                          className={`btn ${c.primary ? "primary" : ""}`}
+                          key={idx}
+                          onClick={c.onClick || (() => setI(Math.min(total - 1, i + 1)))}
+                        >
+                          {c.label}
+                        </button>
+                      )
+                    )}
+                  </div>
+                )}
+                {s.footnote && <div className="footnote" dangerouslySetInnerHTML={{ __html: s.footnote }} />}
+              </div>
+            )}
 
             {s.visual && <div className="visual">{s.visual}</div>}
           </div>
