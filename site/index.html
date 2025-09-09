@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Vayumetrics — Real-time inventory from autonomous drones</title>
+  <meta name="description" content="Autonomous drone scanning, real-time inventory, and a searchable 3D digital twin for warehouses." />
+  <link rel="stylesheet" href="./style.css?v=20250909023659">
+  <script defer src="./app.js?v=20250909023659"></script>
+</head>
+<body>
+  <!-- Header -->
+  <header class="site-header">
+    <div class="container header-row">
+      <a class="brand" href="#top">
+        <img src="../VL.png" alt="Vayumetrics logo" class="brand-logo" />
+        <span class="brand-name">Vayumetrics</span>
+      </a>
+
+      <button class="nav-toggle" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+
+      <nav class="site-nav">
+        <a href="#problem">Problem</a>
+        <a href="#solution">Solution</a>
+        <a href="#how">How it works</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#faq">FAQ</a>
+        <a class="btn ghost" href="../">Back to deck</a>
+        <a class="btn" href="mailto:hello@vayumetrics.com">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+    <!-- HERO -->
+    <section class="hero">
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <h1>
+            Real-time inventory from<br />
+            <span class="brand-accent">autonomous drones</span>
+          </h1>
+          <p class="lead">
+            Nightly scans read barcodes and shelf state without disrupting operations.
+            Wake up to a reconciled <strong>3D digital twin</strong> and photo-proof exceptions.
+          </p>
+          <div class="cta-row">
+            <a class="btn" href="../">See the pitch deck</a>
+            <a class="btn ghost" href="#video">Watch a 12-sec demo</a>
+          </div>
+          <ul class="hero-points">
+            <li>≥50% fewer count hours</li>
+            <li>Exception-driven mornings</li>
+            <li>Searchable spatial twin across sites</li>
+          </ul>
+        </div>
+
+        <div class="hero-visual">
+          <video id="hero-video" class="hero-video" autoplay muted loop playsinline
+                 poster="../3D_digital_twin.png">
+            <source src="../vayumetrics_scan_white.mp4" type="video/mp4" />
+          </video>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROBLEM -->
+    <section id="problem" class="section">
+      <div class="container two-col">
+        <div class="text">
+          <h2>Manual cycle counts are slow &amp; error-prone</h2>
+          <ul class="bullets">
+            <li>Daytime counts disrupt work and still miss misplacements.</li>
+            <li>Quarter-end scrambles: overtime, expedites, write-offs.</li>
+            <li>Leaders lack a live, spatial view across sites.</li>
+          </ul>
+        </div>
+        <div class="visual">
+          <img class="carded" src="../problem.png" alt="Warehouse worker doing manual counts" />
+        </div>
+      </div>
+    </section>
+
+    <!-- SOLUTION -->
+    <section id="solution" class="section tint">
+      <div class="container two-col">
+        <div class="visual">
+          <img class="carded" src="../Solution.png" alt="Autonomous drone inventory solution" />
+        </div>
+        <div class="text">
+          <h2>Automate counts; deliver a living 3D twin</h2>
+          <ul class="bullets">
+            <li>Night scans (scheduled/on-demand) — zero daytime disruption.</li>
+            <li>Computer vision reads labels &amp; shelf state; Pro adds LiDAR geometry.</li>
+            <li>WMS reconciliation + photo-proof exception lists every morning.</li>
+          </ul>
+          <div class="cta-row">
+            <a class="btn" href="#how">How it works</a>
+            <a class="btn ghost" href="mailto:hello@vayumetrics.com">Talk to us</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section id="how" class="section">
+      <div class="container">
+        <h2 class="center">Deploy → Scan → Analyze</h2>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <h3>Deploy</h3>
+            <p>Docked drone; define envelopes &amp; SOPs for each aisle / site.</p>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <h3>Scan</h3>
+            <p>Night flights capture labels &amp; shelf state (LiDAR optional for geometry).</p>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <h3>Analyze</h3>
+            <p>Reconcile to WMS; route exceptions with photo evidence into workflows.</p>
+          </div>
+        </div>
+
+        <div class="figure">
+          <img src="../How_solution_works.png" alt="How the solution works" />
+        </div>
+      </div>
+    </section>
+
+    <!-- BENEFITS -->
+    <section class="section tint">
+      <div class="container two-col">
+        <div class="text">
+          <h2>Measurable impact from week one</h2>
+          <ul class="bullets">
+            <li>≥50% fewer count hours</li>
+            <li>Exception-driven mornings</li>
+            <li>Improves accuracy and OTIF</li>
+          </ul>
+          <div class="cta-row">
+            <a class="btn" href="../">Open the deck</a>
+            <a class="btn ghost" href="mailto:hello@vayumetrics.com">Email us</a>
+          </div>
+        </div>
+        <div class="visual">
+          <img class="carded" src="../B1.png" alt="Key benefits illustration" />
+        </div>
+      </div>
+    </section>
+
+    <!-- ARCHITECTURE -->
+    <section class="section" id="architecture">
+      <div class="container">
+        <h2 class="center">Data &amp; inference architecture</h2>
+        <div class="figure">
+          <img src="../system_architecture.png" alt="System architecture: Drone → Edge → Cloud → WMS" />
+        </div>
+      </div>
+    </section>
+
+    <!-- VIDEO -->
+    <section class="section tint" id="video">
+      <div class="container video-wrap">
+        <h2 class="center">12-second scan demo</h2>
+        <video controls playsinline class="demo-video" poster="../3D_digital_twin.png">
+          <source src="../vayumetrics_scan_white.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+      </div>
+    </section>
+
+    <!-- PRICING -->
+    <section id="pricing" class="section">
+      <div class="container">
+        <h2 class="center">Two SKUs &amp; usage that tracks value</h2>
+        <p class="center muted">90-day paid pilot with opt-to-buy credit to Year-1.</p>
+
+        <div class="price-grid">
+          <article class="price-card">
+            <span class="badge">VISION</span>
+            <h3>Camera-first coverage</h3>
+            <div class="price">$18k–$24k <span class="unit">/site/yr</span></div>
+            <ul>
+              <li>Night scans; zero disruption</li>
+              <li>WMS reconciliation &amp; reports</li>
+              <li>Usage-based — capped</li>
+            </ul>
+            <div class="foot">Best for single-site or pilots</div>
+          </article>
+
+          <article class="price-card featured">
+            <span class="badge">PRO (LiDAR)</span>
+            <h3>Highest accuracy &amp; coverage</h3>
+            <div class="price">$36k+ <span class="unit">/site/yr</span></div>
+            <ul>
+              <li>Spatial 3D twin + shelf state</li>
+              <li>Advanced exception workflows</li>
+              <li>Usage-based — capped</li>
+            </ul>
+            <div class="foot">Multi-aisle / multi-site scale</div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq" class="section tint">
+      <div class="container">
+        <h2 class="center">FAQ</h2>
+        <details class="faq"><summary>Do you integrate with our ERP/WMS?</summary>
+          <p>Yes. We provide secure connectors and reports; reconciliation is included.</p>
+        </details>
+        <details class="faq"><summary>Is it safe to fly at night?</summary>
+          <p>Yes. Enveloped routes, checklists, and supervision factor; no daytime disruption.</p>
+        </details>
+        <details class="faq"><summary>How many drones do we need?</summary>
+          <p>Depends on locations and cycles. Use our ROI calculator in the deck to size quickly.</p>
+        </details>
+      </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section class="section contact">
+      <div class="container contact-card">
+        <div class="contact-copy">
+          <h2>Let’s talk</h2>
+          <p>Ready to see your warehouse from a new angle? We’ll scope a pilot, align success criteria, and get you live in weeks.</p>
+          <div class="cta-row">
+            <a class="btn" href="mailto:hello@vayumetrics.com">hello@vayumetrics.com</a>
+            <a class="btn ghost" href="../">Back to deck</a>
+          </div>
+        </div>
+        <img class="contact-visual" src="../3Dt.png" alt="3D twin visual" />
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-row">
+      <span>© 2025 Vayumetrics. All rights reserved.</span>
+      <nav class="footer-nav">
+        <a href="#problem">Problem</a>
+        <a href="#solution">Solution</a>
+        <a href="#how">How it works</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+    </div>
+  </footer>
+</body>
+</html>
