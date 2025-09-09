@@ -20,7 +20,7 @@ type Slide = {
 /* ===========================
    Helpers (cache-bust)
 =========================== */
-const v = "?v=16";
+const v = "?v=17";
 const asset = (file: string) => `${import.meta.env.BASE_URL}${file}${v}`;
 
 /* ===========================
