@@ -1,0 +1,6 @@
+﻿*.png -filter -diff -merge -text
+*.jpg -filter -diff -merge -text
+*.jpeg -filter -diff -merge -text
+*.gif -filter -diff -merge -text
+*.webm -filter -diff -merge -text
+*.mp4 -filter -diff -merge -text
