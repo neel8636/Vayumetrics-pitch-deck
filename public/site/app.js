@@ -1,41 +1,35 @@
-<!-- ==========================
-3) app.js
-========================== -->
-
-(function(){
-const byId = (id)=>document.getElementById(id);
-const menuBtn = byId('menuBtn');
-const nav = byId('navLinks');
-const year = byId('year');
-if(year) year.textContent = new Date().getFullYear();
-
-
-function toggle(){
-const open = nav.classList.toggle('open');
-menuBtn.setAttribute('aria-expanded', String(open));
+// Mobile nav toggle
+const toggle = document.querySelector('.nav-toggle');
+const nav = document.querySelector('.site-nav');
+if (toggle && nav) {
+  toggle.addEventListener('click', () => {
+    nav.classList.toggle('open');
+    toggle.classList.toggle('open');
+  });
+  // Close on link click (mobile)
+  nav.querySelectorAll('a').forEach(a =>
+    a.addEventListener('click', () => nav.classList.remove('open'))
+  );
 }
-menuBtn.addEventListener('click', toggle);
 
-
-// close menu on link click (mobile)
-nav.addEventListener('click', (e)=>{
-const t = e.target; if(t && t.tagName === 'A' && nav.classList.contains('open')) toggle();
+// Smooth scroll for internal anchors
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const id = a.getAttribute('href');
+    if (!id || id === '#') return;
+    const el = document.querySelector(id);
+    if (el) {
+      e.preventDefault();
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
 });
 
-
-// smooth scroll offset for sticky header
-const header = document.querySelector('header.nav');
-function scrollToHash(){
-if(location.hash){
-const el = document.querySelector(location.hash);
-if(el){
-const y = el.getBoundingClientRect().top + window.scrollY - (header?.offsetHeight || 0) - 8;
-window.scrollTo({ top: y, behavior: 'smooth' });
+// Attempt autoplay on hero video; if blocked, show controls
+const hv = document.getElementById('hero-video');
+if (hv) {
+  const play = hv.play?.();
+  if (play && typeof play.then === 'function') {
+    play.catch(() => { hv.controls = true; });
+  }
 }
-}
-}
-window.addEventListener('hashchange', scrollToHash);
-// if landing with an initial hash
-if(location.hash) setTimeout(scrollToHash, 50);
-})();
-
