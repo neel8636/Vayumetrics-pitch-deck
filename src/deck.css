@@ -380,3 +380,95 @@ a:hover{text-decoration:underline}
 .card.roi-below .visual > *{              /* let ROI component stretch */
   width: 100%;
 }
+/* brand logo bigger */
+.brand-logo {
+  height: 60px;
+  width: auto;
+  object-fit: contain;
+}
+
+/* grid defaults (text + visual) remain as you had */
+.card .grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 22px;
+}
+
+/* full-bleed visual slide */
+.card.full-visual .grid {
+  grid-template-columns: 1fr; /* text collapses above visual */
+}
+.card.full-visual .visual {
+  margin-top: 8px;
+}
+.visual-full-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 14px;
+  box-shadow: 0 2px 20px rgba(18,33,61,0.06);
+}
+
+/* ROI one-column layout (visual only, wide) */
+.card.one-col .grid {
+  grid-template-columns: 1fr;
+}
+.card.one-col .text { display: none; } /* keep the slide clean */
+
+.roi-wide {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 18px;
+}
+@media (max-width: 980px) {
+  .roi-wide { grid-template-columns: 1fr; }
+}
+
+.roi-form h3 { margin: 0 0 10px; }
+.roi-fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(140px, 1fr));
+  gap: 10px;
+}
+.roi-fields label { display: grid; gap: 6px; font-weight: 600; }
+.roi-fields input {
+  border: 1px solid var(--line, #e3ecff);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font: inherit;
+}
+
+.roi-out {
+  border: 1px solid var(--line, #e3ecff);
+  border-radius: 12px;
+  padding: 14px;
+  background: #fff;
+}
+.roi-out h4 { margin: 0 0 8px; }
+.roi-note { margin-top: 8px; color: var(--sub, #4a6287); }
+
+/* Pricing cards side-by-side */
+.pricing-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(220px, 1fr));
+  gap: 16px;
+}
+.pcard {
+  background: #fff;
+  border: 1px solid #e7eefc;
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: 0 2px 14px rgba(11,16,32,0.04);
+}
+.pcard.featured {
+  border-color: #cfe0ff;
+  box-shadow: 0 6px 26px rgba(43,124,255,0.12);
+}
+.ptier { font-weight: 800; margin-bottom: 6px; }
+.pprice {
+  font-size: 22px;
+  font-weight: 900;
+  margin-bottom: 10px;
+}
+.psub { font-weight: 600; font-size: 13px; color: #4a6287; margin-left: 4px; }
+.pbullets { margin: 0; padding-left: 18px; color: #264; }
