@@ -1,7 +1,7 @@
 <!-- ==========================
 3) app.js
 ========================== -->
-<script id="inline-js">
+
 (function(){
 const byId = (id)=>document.getElementById(id);
 const menuBtn = byId('menuBtn');
@@ -38,4 +38,4 @@ window.addEventListener('hashchange', scrollToHash);
 // if landing with an initial hash
 if(location.hash) setTimeout(scrollToHash, 50);
 })();
-</script>
+
