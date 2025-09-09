@@ -472,3 +472,46 @@ a:hover{text-decoration:underline}
 }
 .psub { font-weight: 600; font-size: 13px; color: #4a6287; margin-left: 4px; }
 .pbullets { margin: 0; padding-left: 18px; color: #264; }
+/* Full-bleed visuals when the slide has no text column */
+.card .grid.full-bleed {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+.card .grid.full-bleed .text { display: none; }
+.card .grid.full-bleed .visual { width: 100%; }
+
+/* Pricing layout */
+.price-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(280px, 1fr));
+  gap: 20px;
+  align-items: stretch;
+}
+.price-banner {
+  grid-column: 1 / -1;
+  background: #f7fbff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 14px;
+  color: var(--muted);
+  font-weight: 600;
+}
+.price-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 10px 28px rgba(2,6,23,0.06);
+}
+.price-card .badge {
+  display: inline-block;
+  padding: 4px 10px; border-radius: 999px;
+  background: #fff3d6; font-weight: 800; font-size: 12px; margin-bottom: 8px;
+}
+.price-card .price { font-size: 20px; font-weight: 800; color: #334155; margin: 6px 0 10px; }
+.price-card .features { margin: 0; padding-left: 18px; }
+.price-card .card-foot .hint { color: #64748b; font-size: 12px; }
+
+@media (max-width: 980px) {
+  .price-grid { grid-template-columns: 1fr; }
+}

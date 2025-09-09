@@ -21,7 +21,7 @@ type Slide = {
    Helpers (cache-bust + BASE_URL-safe)
 =========================== */
 // bump whenever media changes
-const v = "?v=27";
+const v = "?v=28";
 // works on / (dev) and /<repo>/ (GH Pages)
 const base = (import.meta.env?.BASE_URL ?? "/").replace(/\/+$/, "");
 const asset = (p: string) => `${base}/${String(p).replace(/^\/+/, "")}${v}`;
@@ -172,40 +172,63 @@ const CompetitorMap: React.FC = () => {
   );
 };
 
-/** Market sizing — TAM/SAM/SOM */
+/** Market sizing — improved presentation (TAM/SAM/SOM) */
 const MarketSizing: React.FC = () => {
-  const W = 900, H = 520;
-  const cx = W * 0.40, cy = H * 0.56;
+  const W = 980, H = 520;
+  const cx = W * 0.35, cy = H * 0.55;
   const rT = 180, rS = 120, rO = 70;
 
-  const Card = ({ y, title, value, note }:
-    { y:number; title:string; value:string; note:string }) => (
+  const Callout = ({
+    y, title, value, note, accent = "#3b82f6",
+  }: { y:number; title:string; value:string; note:string; accent?:string }) => (
     <g>
-      <rect x={W*0.58} y={y-32} width={W*0.36} height={84} rx={12} fill="#fff" stroke="#e6eefb" />
-      <text x={W*0.76} y={y-8} textAnchor="middle" style={{fill:"#1b2e58",fontWeight:800,fontSize:16}}>{title}</text>
-      <text x={W*0.76} y={y+16} textAnchor="middle" style={{fill:"#2b7cff",fontWeight:900,fontSize:18}}>{value}</text>
-      <text x={W*0.76} y={y+36} textAnchor="middle" style={{fill:"#5a6f96",fontSize:12}}>{note}</text>
+      <rect x={W*0.55} y={y-38} width={W*0.38} height={96} rx={14} fill="#fff" stroke="#e6eefb" />
+      <circle cx={W*0.55} cy={y+10} r={6} fill={accent} />
+      <text x={W*0.74} y={y-12} textAnchor="middle" style={{fill:"#0f1a37",fontWeight:800,fontSize:16}}>
+        {title}
+      </text>
+      <text x={W*0.74} y={y+12} textAnchor="middle" style={{fill:accent,fontWeight:900,fontSize:20}}>
+        {value}
+      </text>
+      <text x={W*0.74} y={y+34} textAnchor="middle" style={{fill:"#5a6f96",fontSize:12}}>
+        {note}
+      </text>
     </g>
   );
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="auto" aria-label="Market sizing TAM/SAM/SOM">
+      <defs>
+        <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="6" stdDeviation="8" floodColor="#0b2a6b" floodOpacity="0.08" />
+        </filter>
+      </defs>
       <rect x="0" y="0" width={W} height={H} rx="22" fill="#fff" stroke="#e7effa" />
-      <g>
-        <circle cx={cx} cy={cy} r={rT} fill="#f2f7ff" stroke="#dfeaff" />
-        <circle cx={cx} cy={cy} r={rS} fill="#e7f0ff" stroke="#d3e2ff" />
+      {/* Left rings */}
+      <g filter="url(#softShadow)">
+        <circle cx={cx} cy={cy} r={rT} fill="#f1f6ff" stroke="#dfe7ff" />
+        <circle cx={cx} cy={cy} r={rS} fill="#e6efff" stroke="#d3e2ff" />
         <circle cx={cx} cy={cy} r={rO} fill="#d9e8ff" stroke="#c8ddff" />
-        <text x={cx} y={cy - rT - 14} textAnchor="middle" style={{fill:"#243b6b",fontWeight:900,fontSize:16}}>
-          Market Opportunity
-        </text>
-        <text x={cx} y={cy + 6} textAnchor="middle" style={{fill:"#1b2e58",fontWeight:800,fontSize:14}}>SOM</text>
-        <text x={cx} y={cy - rS + 18} textAnchor="middle" style={{fill:"#1b2e58",fontWeight:800,fontSize:14}}>SAM</text>
-        <text x={cx} y={cy - rT + 22} textAnchor="middle" style={{fill:"#1b2e58",fontWeight:800,fontSize:14}}>TAM</text>
       </g>
-      <Card y={H*0.34} title="TAM (macro)" value="≈ $55–60B (2030)" note="Warehouse automation analysts" />
-      <Card y={H*0.52} title="SAM (top-down)" value="≈ $2–4B (NA+EU)" note="Inventory intel & twin software wedge" />
-      <Card y={H*0.70} title="SAM (bottom-up)" value="≈ $0.4–0.84B" note="8–12k sites × $50–70k ACV" />
-      <Card y={H*0.86} title="SOM (3–4 yrs)" value="≈ $12M ARR" note="~200 sites × ~$60k ACV" />
+      <text x={cx} y={cy - rT - 14} textAnchor="middle" style={{fill:"#243b6b",fontWeight:900,fontSize:16}}>
+        Market Opportunity
+      </text>
+      <text x={cx} y={cy + 8} textAnchor="middle" style={{fill:"#0f1a37",fontWeight:900,fontSize:14}}>SOM</text>
+      <text x={cx} y={cy - rS + 20} textAnchor="middle" style={{fill:"#0f1a37",fontWeight:900,fontSize:14}}>SAM</text>
+      <text x={cx} y={cy - rT + 24} textAnchor="middle" style={{fill:"#0f1a37",fontWeight:900,fontSize:14}}>TAM</text>
+
+      {/* Connector guides */}
+      <g stroke="#e6eefb">
+        <line x1={cx + rO} y1={cy} x2={W*0.55} y2={H*0.35} />
+        <line x1={cx + rS} y1={cy - 10} x2={W*0.55} y2={H*0.52} />
+        <line x1={cx + rT} y1={cy - 20} x2={W*0.55} y2={H*0.69} />
+      </g>
+
+      {/* Right callouts (top to bottom) */}
+      <Callout y={H*0.35} title="TAM (macro)" value="≈ $55–60B (2030)" note="Warehouse automation analysts" accent="#1d4ed8" />
+      <Callout y={H*0.52} title="SAM (top-down)" value="≈ $2–4B (NA+EU)" note="Inventory intel & twin software wedge" accent="#2563eb" />
+      <Callout y={H*0.69} title="SAM (bottom-up)" value="≈ $0.4–0.84B" note="8–12k sites × $50–70k ACV" accent="#3b82f6" />
+      <Callout y={H*0.86} title="SOM (3–4 yrs)" value="≈ $12M ARR" note="~200 sites × ~$60k ACV" accent="#60a5fa" />
     </svg>
   );
 };
@@ -280,7 +303,7 @@ function makeSlides(next: (index: number) => void): Slide[] {
       tag: "BENEFITS",
       title: "Measurable impact from week one",
       visual: <img className="visual-img" src={asset("B1.png")} alt="Key benefits" />,
-      // If you want copy instead of image-only later, uncomment:
+      // If you want copy instead later, uncomment and it will switch to 2-col:
       // bullets: [
       //   "Higher accuracy — greater precision than manual counts.",
       //   "Fast turnaround — reduce time and cost of cycle counting.",
@@ -308,7 +331,7 @@ function makeSlides(next: (index: number) => void): Slide[] {
       visual: <img className="visual-img" src={asset("system_architecture.png")} alt="System architecture" />,
     },
 
-    // 8 — MARKET (TAM / SAM / SOM)
+    // 8 — MARKET (improved TAM / SAM / SOM)
     {
       tag: "MARKET",
       title: "TAM · SAM · SOM (top-down + bottom-up)",
@@ -435,7 +458,8 @@ export default function App() {
           <img src={asset("VL.png")} alt="VL" style={{ height: "80px", objectFit: "contain" }} />
         </div>
         <nav className="menu">
-          <a href="/site/">Website</a>
+          {/* GH Pages–safe website link */}
+          <a href={`${base}/site/`}>Website</a>
           <a href="mailto:neel8636@gmail.com"><Mail size={16} /> Contact</a>
         </nav>
       </header>
@@ -449,7 +473,8 @@ export default function App() {
         <article className={`card ${s.className ?? ""}`}>
           {s.title && <h1 className="title">{s.title}</h1>}
 
-          <div className={`grid ${s.visual && hasText ? "has-visual" : ""}`}>
+          {/* Full-bleed whenever there is no text content */}
+          <div className={`grid ${s.visual && hasText ? "has-visual" : "full-bleed"}`}>
             {hasText && (
               <div className="text">
                 {s.bullets && (
