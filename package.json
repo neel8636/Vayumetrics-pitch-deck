@@ -3,11 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "scripts": {
+    "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "predeploy": "vite build",
+    "predeploy": "vite build --base=/Vayumetrics-pitch-deck/ && node -e \"require('fs').copyFileSync('dist/index.html','dist/404.html')\"",
     "deploy": "gh-pages -d dist -b gh-pages"
   },
   "dependencies": {
@@ -25,4 +25,5 @@
     "typescript": "^5.5.4",
     "vite": "^5.4.10"
   }
+  
 }
