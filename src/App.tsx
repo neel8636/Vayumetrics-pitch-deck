@@ -138,8 +138,13 @@ function ROI() {
   );
 }
 
+/* ======= Pricing visual (full-slide, two large cards) ======= */
 const PricingCards: React.FC = () => (
   <div className="price-grid">
+    <div className="price-banner">
+      90-day paid pilot with opt-to-buy credit to Year-1.
+    </div>
+
     <article className="price-card vision" aria-label="Vision plan">
       <span className="badge">VISION</span>
       <h3>Camera-first coverage</h3>
@@ -274,11 +279,18 @@ function makeSlides(next: (n: number) => void): Slide[] {
       visual: <Img className="visual-img" src="How_solution_works.png" alt="How it works" />,
     },
 
-    // 5 — BENEFITS (image only; no bullets)
+    // 5 — BENEFITS (full slide image)
     {
       tag: "BENEFITS",
       title: "Measurable impact from week one",
       visual: <Img className="visual-img fullbleed" src="B1.png" alt="Key benefits" />,
+      // If you decide to add bullets later, just uncomment below:
+      // bullets: [
+      //   "Higher accuracy — greater precision than manual counts.",
+      //   "Fast turnaround — reduce time and cost of cycle counting.",
+      //   "Autonomous operation — free up teams for value work.",
+      //   "API integration — connect ERP/WMS to automate.",
+      // ],
     },
 
     // 6 — ARCHITECTURE
@@ -305,19 +317,17 @@ function makeSlides(next: (n: number) => void): Slide[] {
       visual: <CompetitorMap />,
     },
 
-    // 8 — PRICING (two equal cards)
+    // 8 — PRICING (FULL SLIDE: two equal cards; bullets omitted to allow full-bleed)
     {
       tag: "PRICING",
       title: "Two SKUs & usage that tracks value",
-      bullets: ["90-day paid pilot with opt-to-buy credit to Year-1."],
       visual: <PricingCards />,
     },
 
-    // 9 — ROI (full-width under text)
+    // 9 — ROI (FULL SLIDE: calculator takes entire width; bullets omitted)
     {
       tag: "ROI",
       title: "Back-of-the-envelope ROI",
-      bullets: ["Adjust locations, cycles, and rates to match your site."],
       visual: <ROI />,
     },
 
@@ -375,7 +385,8 @@ export default function App() {
         <article className={`card ${s.className ?? ""}`}>
           {s.title && <h1 className="title">{s.title}</h1>}
 
-          <div className={`grid ${s.visual ? "has-visual" : ""}`}>
+          <div className={`grid ${s.visual ? "has-visual" : ""} ${!s.bullets ? "full-bleed" : ""}`}>
+            {/* When bullets are omitted, CSS should let .visual span full width */}
             <div className="text">
               {s.bullets && (
                 <ul
@@ -404,16 +415,16 @@ export default function App() {
             {s.visual && <div className="visual">{s.visual}</div>}
           </div>
 
-        {i > 0 && (
-          <button className="nav left" onClick={() => setI(Math.max(0, i - 1))} aria-label="Previous">
-            <ArrowLeft />
-          </button>
-        )}
-        {i < total - 1 && (
-          <button className="nav right" onClick={() => setI(Math.min(total - 1, i + 1))} aria-label="Next">
-            <ArrowRight />
-          </button>
-        )}
+          {i > 0 && (
+            <button className="nav left" onClick={() => setI(Math.max(0, i - 1))} aria-label="Previous">
+              <ArrowLeft />
+            </button>
+          )}
+          {i < total - 1 && (
+            <button className="nav right" onClick={() => setI(Math.min(total - 1, i + 1))} aria-label="Next">
+              <ArrowRight />
+            </button>
+          )}
         </article>
 
         <footer className="legal">© 2025 Vayumetrics. All rights reserved.</footer>
