@@ -20,10 +20,13 @@ type Slide = {
 /* ===========================
    Helpers (cache-bust)
 =========================== */
-// cache-bust
-const v = "?v=21";
-// BASE_URL is "/Vayumetrics-pitch-deck/" from vite.config.ts
-const asset = (file: string) => new URL(file + v, import.meta.env.BASE_URL).toString();
+// cache-bust (bump whenever you change media)
+const v = "?v=22";
+
+// Safe path join using the repo base path Vite injects
+const base = (import.meta.env.BASE_URL || "/").replace(/\/+$/, "");
+const asset = (p: string) =>
+  `${base}/${String(p).replace(/^\/+/, "")}${v}`;
 
 
 /* ===========================
