@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-    "scripts": {
+  "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
@@ -25,5 +25,4 @@
     "typescript": "^5.5.4",
     "vite": "^5.4.10"
   }
-  
 }

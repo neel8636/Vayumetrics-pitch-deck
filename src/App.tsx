@@ -21,7 +21,7 @@ type Slide = {
    Helpers (cache-bust + BASE_URL-safe)
 =========================== */
 // bump whenever media changes
-const v = "?v=28";
+const v = "?v=29";
 // works on / (dev) and /<repo>/ (GH Pages)
 const base = (import.meta.env?.BASE_URL ?? "/").replace(/\/+$/, "");
 const asset = (p: string) => `${base}/${String(p).replace(/^\/+/, "")}${v}`;
@@ -303,13 +303,6 @@ function makeSlides(next: (index: number) => void): Slide[] {
       tag: "BENEFITS",
       title: "Measurable impact from week one",
       visual: <img className="visual-img" src={asset("B1.png")} alt="Key benefits" />,
-      // If you want copy instead later, uncomment and it will switch to 2-col:
-      // bullets: [
-      //   "Higher accuracy — greater precision than manual counts.",
-      //   "Fast turnaround — reduce time and cost of cycle counting.",
-      //   "Autonomous operation — free up teams for value work.",
-      //   "API integration — connect ERP/WMS to automate.",
-      // ],
     },
 
     // 6 — SECURITY (image only → fills card)
@@ -398,7 +391,7 @@ function makeSlides(next: (index: number) => void): Slide[] {
       visual: <ROI />,
     },
 
-    // 12 — TEAM
+    // 12 — TEAM (Neel)
     {
       tag: "TEAM",
       title: "Neel Desai — Founder & CEO",
@@ -410,6 +403,20 @@ function makeSlides(next: (index: number) => void): Slide[] {
         'Email: <a href="mailto:neel8636@gmail.com">neel8636@gmail.com</a> • Phone: +1 (781) 824-1614',
       ],
       visual: <img className="founder" src={asset("Neel_ph.jpg")} alt="Neel Desai" />,
+    },
+
+    // 13 — TEAM (Jay) — concise like Neel's
+    {
+      tag: "TEAM",
+      title: "Co-Founder & CTO — Jaykumar (“Jay”) Goswami",
+      bullets: [
+        "1st in Robotics @ Ural Fed. Univ. (FAST-LIO/LIO-SAM, ROS, mapping)",
+        "Mechatronics Intern @ Breaking (Harvard i-Labs): sensor stack; bioreactor upgrades",
+        "TA @ Northeastern (ME5640 Additive Mfg): hands-on AM/3D printing labs",
+        'Strengths: ROS2, LiDAR-IMU fusion & SLAM; end-to-end mechatronics; rapid prototyping',
+        'LinkedIn: <a href="https://linkedin.com/in/goswamijay" target="_blank">linkedin.com/in/goswamijay</a> • Email: <a href="mailto:goswami.j@northeastern.edu">goswami.j@northeastern.edu</a>',
+      ],
+      visual: <img className="founder" src={asset("JG.jpg")} alt="Jaykumar Goswami" />,
     },
   ];
 }
